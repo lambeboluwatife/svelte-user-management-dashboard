@@ -1,8 +1,31 @@
 <script>
-    import { fade } from 'svelte/transition'
-    let { users, deleteUser, editUser, darkMode } = $props();
+    import { fade, scale } from 'svelte/transition'
+    import { UsersStore } from "../stores"
+  import Footer from "./Footer.svelte";
+
+    let { darkMode } = $props();
     let editingId = $state(null);
     let editForm = $state({ name: '', email: '', role: '' });
+
+    let users = $derived($UsersStore);
+    
+    let searchQuery = $state('');
+
+    const filteredUsers = $derived(
+        users.filter(user => 
+            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.role.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    );
+
+    const editUser = (updatedUser) => {
+        UsersStore.update((currentUsers) => {
+            return currentUsers.map(user => 
+                user.id === updatedUser.id ? updatedUser : user
+            );
+        });
+    }
 
     const startEdit = (user) => {
         editingId = user.id;
@@ -17,6 +40,12 @@
     const saveEdit = (id) => {
         editUser({ id, ...editForm });
         cancelEdit();
+    }
+
+    const deleteUser = (id) => {
+        UsersStore.update((currentUsers) => {
+            return currentUsers.filter(user => user.id !== id);
+        });
     }
 
     const getRoleBadgeColor = (role) => {
@@ -43,8 +72,22 @@
     }
 </script>
 
+ <div class="mb-6">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 {darkMode ? 'text-slate-500' : 'text-slate-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Search users by name, email, or role..." 
+          bind:value={searchQuery}
+          class="w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all {darkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-white border-slate-200 border'}"
+        />
+      </div>
+    </div>
+
 <div class="rounded-xl shadow-sm overflow-hidden transition-colors duration-200 {darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}">
-    {#if users.length === 0}
+    {#if filteredUsers.length === 0}
         <div class="p-12 text-center">
             <svg class="mx-auto h-12 w-12 {darkMode ? 'text-slate-600' : 'text-slate-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
@@ -63,8 +106,8 @@
                     </tr>
                 </thead>
                 <tbody class="{darkMode ? 'divide-y divide-slate-700' : 'divide-y divide-slate-200'}">
-                    {#each users as user (user.id)}
-                        <tr class="transition-colors {darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-50'}" in:fade out:fade>
+                    {#each filteredUsers as user (user.id)}
+                        <tr class="transition-colors {darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-50'}" in:scale out:fade={{ duration: 500 }}>
                             {#if editingId === user.id}
                                 <td class="px-6 py-4">
                                     <input 
@@ -141,3 +184,5 @@
         </div>
     {/if}
 </div>
+
+<Footer {darkMode} {filteredUsers}/>

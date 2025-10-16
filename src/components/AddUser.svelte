@@ -1,18 +1,24 @@
 <script>
+    import {UsersStore} from "../stores"
     let name = $state('');
     let email = $state('');
     let role = $state('');
     let errorMessage = $state('');
 
-    let {addUser, darkMode} = $props();
+    let {darkMode} = $props();
+    let users = $derived($UsersStore);
+    
+        const addUser = (newUser) => {
+            UsersStore.update((currentUsers) => {
+                return [...currentUsers, newUser];
+            });
+    }
 
     const submitForm = (e) => {
         e.preventDefault();
         
-        // Clear previous error
         errorMessage = '';
         
-        // Validate fields
         if (!name.trim()) {
             errorMessage = 'Name is required';
             return;
