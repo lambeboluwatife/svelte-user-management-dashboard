@@ -1,7 +1,8 @@
 <script>
     import { fade, scale } from 'svelte/transition'
-    import { UsersStore } from "../stores"
-  import Footer from "./Footer.svelte";
+    import { UsersStore, editUser, deleteUser } from "../stores.svelte"
+    import { getRoleBadgeColor } from "../utils/roleColors"
+    import Footer from "./Footer.svelte";
 
     let { darkMode } = $props();
     let editingId = $state(null);
@@ -19,14 +20,6 @@
         )
     );
 
-    const editUser = (updatedUser) => {
-        UsersStore.update((currentUsers) => {
-            return currentUsers.map(user => 
-                user.id === updatedUser.id ? updatedUser : user
-            );
-        });
-    }
-
     const startEdit = (user) => {
         editingId = user.id;
         editForm = { name: user.name, email: user.email, role: user.role };
@@ -40,35 +33,6 @@
     const saveEdit = (id) => {
         editUser({ id, ...editForm });
         cancelEdit();
-    }
-
-    const deleteUser = (id) => {
-        UsersStore.update((currentUsers) => {
-            return currentUsers.filter(user => user.id !== id);
-        });
-    }
-
-    const getRoleBadgeColor = (role) => {
-        const lightColors = {
-            admin: 'bg-purple-100 text-purple-700',
-            manager: 'bg-blue-100 text-blue-700',
-            developer: 'bg-green-100 text-green-700',
-            engineer: 'bg-teal-100 text-teal-700',
-            designer: 'bg-pink-100 text-pink-700',
-            analyst: 'bg-orange-100 text-orange-700',
-            default: 'bg-slate-100 text-slate-700'
-        };
-        const darkColors = {
-            admin: 'bg-purple-900 text-purple-300',
-            manager: 'bg-blue-900 text-blue-300',
-            developer: 'bg-green-900 text-green-300',
-            engineer: 'bg-teal-900 text-teal-300',
-            designer: 'bg-pink-900 text-pink-300',
-            analyst: 'bg-orange-900 text-orange-300',
-            default: 'bg-slate-700 text-slate-300'
-        };
-        const colors = darkMode ? darkColors : lightColors;
-        return colors[role.toLowerCase()] || colors.default;
     }
 </script>
 

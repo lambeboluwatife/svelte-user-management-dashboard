@@ -1,18 +1,11 @@
 <script>
-    import {UsersStore} from "../stores"
+    import { addUser } from "../stores.svelte";
     let name = $state('');
     let email = $state('');
     let role = $state('');
     let errorMessage = $state('');
 
-    let {darkMode} = $props();
-    let users = $derived($UsersStore);
-    
-        const addUser = (newUser) => {
-            UsersStore.update((currentUsers) => {
-                return [...currentUsers, newUser];
-            });
-    }
+     let {darkMode} = $props();
 
     const submitForm = (e) => {
         e.preventDefault();
@@ -48,6 +41,16 @@
         errorMessage = '';
     }
 </script>
+
+{#snippet selectOption()}
+    <option value="" disabled selected>Select role</option>
+    <option value="admin">Admin</option>
+    <option value="developer">Developer</option>
+    <option value="designer">Designer</option>
+    <option value="manager">Manager</option>
+    <option value="analyst">Analyst</option>
+    <option value="engineer">Engineer</option>
+{/snippet}
 
 <div class="rounded-xl shadow-sm p-6 transition-colors duration-200 {darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}">
     <h2 class="text-xl font-semibold mb-4 {darkMode ? 'text-white' : 'text-slate-800'}">Add New User</h2>
@@ -86,19 +89,20 @@
 
         <div class="flex flex-col">
             <label for="role" class="text-sm font-medium mb-1 {darkMode ? 'text-slate-300' : 'text-slate-700'}">Role</label>
-            <input 
+            <select 
                 id="role"
-                type="text" 
-                placeholder="Developer" 
                 bind:value={role}
-                class="px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all {darkMode ? 'bg-slate-900 border-slate-600 text-white placeholder-slate-500' : 'border border-slate-300'}"
-            />
+                class="px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer appearance-none bg-no-repeat bg-right {darkMode ? 'bg-slate-900 border-slate-600 text-white [&>option]:bg-slate-900 [&>option]:text-white' : 'border border-slate-300 bg-white [&>option]:bg-white [&>option]:text-slate-900'}"
+                style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27{darkMode ? '%23cbd5e1' : '%23475569'}%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-position: right 0.5rem center; background-size: 1.25rem;"
+            >
+                   {@render selectOption() }
+            </select>
         </div>
 
         <div class="flex flex-col justify-end">
             <button 
                 type="submit"
-                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md active:scale-95 transform"
+                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md active:scale-95 transform"
             >
                 Add User
             </button>
